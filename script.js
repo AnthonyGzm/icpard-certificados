@@ -11,7 +11,7 @@ function buscarCertificado() {
         return;
     }
     
-    // Ocultar resultados anteriores
+    // Ocultar resultados y mensaje anteriores
     resultado.classList.add('hidden');
     noResultado.classList.add('hidden');
     
@@ -40,8 +40,12 @@ function buscarCertificado() {
 
 function mostrarResultados(certificados) {
     const resultado = document.getElementById('resultado');
+    const noResultado = document.getElementById('noResultado');
     const datosPrincipales = document.getElementById('datosPrincipales');
     const tablaCertificados = document.getElementById('tablaCertificados').getElementsByTagName('tbody')[0];
+    
+    // Ocultar mensaje de "no encontrado" si estaba visible
+    noResultado.classList.add('hidden');
     
     // Obtener datos del primer certificado para mostrar datos principales
     const primerCertificado = certificados[0];
@@ -60,7 +64,6 @@ function mostrarResultados(certificados) {
     // Llenar tabla con certificados
     certificados.forEach(cert => {
         const row = tablaCertificados.insertRow();
-        
         row.innerHTML = `
             <td>${cert.nombre_documento || 'Certificado ICPARD'}</td>
             <td>${cert.filial || 'ICPARD'}</td>
@@ -80,7 +83,13 @@ function mostrarResultados(certificados) {
 }
 
 function mostrarSinResultados() {
+    const resultado = document.getElementById('resultado');
     const noResultado = document.getElementById('noResultado');
+    
+    // Aseguramos que el contenedor de resultados esté oculto
+    resultado.classList.add('hidden');
+    
+    // Mostramos mensaje de "no encontrado"
     noResultado.classList.remove('hidden');
 }
 

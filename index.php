@@ -10,10 +10,15 @@
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <style>
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-
     <!-- Encabezado con logo -->
     <header class="header">
       <a href="https://www.icpard.org" target="_blank">
@@ -21,7 +26,6 @@
       </a>
       <h1>Consultor de Certificados ICPARD</h1>
     </header>
-
     <p>Ingrese la <strong>cédula</strong> o <strong>matrícula</strong> del certificado para consultarlo.</p>
     
     <!-- Caja de búsqueda -->
@@ -32,30 +36,30 @@
 
     <!-- Contenedor de resultados -->
     <div id="resultado" class="hidden">
-
       <!-- Datos principales del titular -->
       <div id="datosPrincipales" class="datos-principales">
       </div>
-
       <!-- Tabla de certificados -->
-      <table id="tablaCertificados">
-        <thead>
-          <tr>
-            <th>Nombre Del Documento</th>
-            <th>Filial</th>
-            <th>Fecha</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-
+      <div id="tablaContainer">
+        <table id="tablaCertificados">
+          <thead>
+            <tr>
+              <th>Nombre Del Documento</th>
+              <th>Filial</th>
+              <th>Fecha</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Mensaje si no hay resultados -->
-    <p id="noResultado" class="no-result hidden"> No se encontró ningún certificado con esos datos.</p>
-
+    <div id="noResultado" class="no-result hidden">
+      <p>No se encontró ningún certificado con esos datos.</p>
+    </div>
   </div>
 </body>
 </html>
