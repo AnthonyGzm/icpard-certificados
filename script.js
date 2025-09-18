@@ -1,96 +1,49 @@
+// Función principal para buscar certificados
 function buscarCertificado() {
     const searchInput = document.getElementById('searchInput');
-    const resultado = document.getElementById('resultado');
-    const noResultado = document.getElementById('noResultado');
-    const datosPrincipales = document.getElementById('datosPrincipales');
-    const tablaBody = document.querySelector("#tablaCertificados tbody");
-
     const busqueda = searchInput.value.trim();
-    
+
     if (!busqueda) {
         alert("Por favor ingrese una cédula o matrícula");
         return;
     }
 
-    // Mostrar indicador de carga
-    mostrarCargando(true);
+    // Actualizar la URL sin recargar la página
+    const nuevaUrl = `${window.location.pathname}?search=${encodeURIComponent(busqueda)}`;
+    window.history.pushState({ path: nuevaUrl }, '', nuevaUrl);
 
-    // Limpiar resultados anteriores
+    mostrarCargando(true);
     limpiarResultados();
 
-    fetch("buscar.php", {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Cache-Control": "no-cache"
-        },
-        body: "busqueda=" + encodeURIComponent(busqueda)
-    })
-    .then(response => {
-        console.log("Status de respuesta:", response.status);
-        console.log("Headers de respuesta:", response.headers);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        return response.text();
-    })
-    .then(text => {
-        console.log("Respuesta cruda del servidor:", text || "(vacío)");
-        console.log("Longitud de respuesta:", text.length);
-
-        if (!text || text.trim() === "") {
-            throw new Error("El servidor devolvió una respuesta vacía");
-        }
-
-        let data;
-        try {
-            data = JSON.parse(text);
-            console.log("Datos parseados:", data);
-        } catch (e) {
-            console.error("Error parseando JSON:", e);
-            console.error("Texto que causó el error:", text);
-            throw new Error("El servidor devolvió datos inválidos. Revise la consola para más detalles.");
-        }
-
-        procesarRespuesta(data);
-
-    })
-    .catch(error => {
-        console.error("Error en fetch:", error);
-        mostrarError("Error de conexión: " + error.message);
-    })
-    .finally(() => {
-        mostrarCargando(false);
-    });
+    fetch(`buscar.php?search=${encodeURIComponent(busqueda)}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            return response.json();
+        })
+        .then(data => procesarRespuesta(data))
+        .catch(error => mostrarError("Error de conexión: " + error.message))
+        .finally(() => mostrarCargando(false));
 }
 
+// Procesar la respuesta y mostrar resultados
 function procesarRespuesta(data) {
     const resultado = document.getElementById('resultado');
     const noResultado = document.getElementById('noResultado');
     const datosPrincipales = document.getElementById('datosPrincipales');
     const tablaBody = document.querySelector("#tablaCertificados tbody");
 
-    // Verificar si hay error en la respuesta
     if (data.error) {
-        console.log("Error desde PHP:", data.error);
         mostrarSinResultados(data.error);
         return;
     }
 
-    // Verificar estructura de respuesta mejorada
     const datos = data.datos || data;
-    
+
     if (!Array.isArray(datos) || datos.length === 0) {
-        const mensaje = data.message || "No se encontraron resultados para la búsqueda realizada.";
-        mostrarSinResultados(mensaje);
+        mostrarSinResultados(data.message || "No se encontraron resultados.");
         return;
     }
 
-    console.log("Procesando", datos.length, "registros");
-
-    // Mostrar resultados
     resultado.classList.remove("hidden");
     noResultado.classList.add("hidden");
 
@@ -105,9 +58,9 @@ function procesarRespuesta(data) {
         </div>
     `;
 
-    // Filtrar y mostrar certificados
+    // Filtrar certificados
     const certificados = datos.filter(item => item.certificado_id != null);
-    
+
     if (certificados.length === 0) {
         tablaBody.innerHTML = `
             <tr>
@@ -117,6 +70,7 @@ function procesarRespuesta(data) {
             </tr>
         `;
     } else {
+        tablaBody.innerHTML = "";
         certificados.forEach(cert => {
             const fila = document.createElement('tr');
             fila.innerHTML = `
@@ -137,34 +91,31 @@ function procesarRespuesta(data) {
     }
 }
 
+// Mostrar mensaje de sin resultados
 function mostrarSinResultados(mensaje) {
-    const resultado = document.getElementById('resultado');
+    document.getElementById('resultado').classList.add("hidden");
     const noResultado = document.getElementById('noResultado');
-    
-    resultado.classList.add("hidden");
     noResultado.classList.remove("hidden");
     noResultado.innerHTML = `<p>${mensaje}</p>`;
 }
 
+// Mostrar alert de error
 function mostrarError(mensaje) {
     alert(mensaje);
 }
 
+// Limpiar resultados anteriores
 function limpiarResultados() {
-    const tablaBody = document.querySelector("#tablaCertificados tbody");
-    const datosPrincipales = document.getElementById('datosPrincipales');
-    
-    tablaBody.innerHTML = "";
-    datosPrincipales.innerHTML = "";
-    
-    // Ocultar todos los contenedores
+    document.querySelector("#tablaCertificados tbody").innerHTML = "";
+    document.getElementById('datosPrincipales').innerHTML = "";
     document.getElementById('resultado').classList.add('hidden');
     document.getElementById('noResultado').classList.add('hidden');
 }
 
+// Indicador de carga en botón de búsqueda
 function mostrarCargando(mostrar) {
     const button = document.querySelector('.search-box button');
-    
+    if (!button) return;
     if (mostrar) {
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
@@ -174,29 +125,31 @@ function mostrarCargando(mostrar) {
     }
 }
 
+// Formatear fecha a dd/mm/yyyy
 function formatearFecha(fecha) {
     if (!fecha) return 'Fecha no disponible';
-    
     try {
         const fechaObj = new Date(fecha);
-        return fechaObj.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
-    } catch (e) {
-        return fecha; // Devolver fecha original si no se puede formatear
+        return fechaObj.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    } catch {
+        return fecha;
     }
 }
 
-// Permitir búsqueda con Enter
-document.addEventListener('DOMContentLoaded', function() {
+// Ejecutar búsqueda si la URL ya tiene ?search=
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const search = urlParams.get('search');
     const searchInput = document.getElementById('searchInput');
+    if (search && searchInput) {
+        searchInput.value = search;
+        buscarCertificado();
+    }
+
+    // Permitir búsqueda con Enter
     if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                buscarCertificado();
-            }
+        searchInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') buscarCertificado();
         });
     }
 });
