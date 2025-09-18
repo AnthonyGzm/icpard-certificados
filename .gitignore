@@ -404,3 +404,4 @@ FodyWeavers.xsd
 certificados/
 debug.php
 icpard_certificados.sql
+config.php

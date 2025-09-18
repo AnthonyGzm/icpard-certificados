@@ -1,3 +1,6 @@
+// Variable global para almacenar el PDF seleccionado
+let certificadoSeleccionado = "";
+
 // Función principal para buscar certificados
 function buscarCertificado() {
     const searchInput = document.getElementById('searchInput');
@@ -61,6 +64,7 @@ function procesarRespuesta(data) {
     // Filtrar certificados
     const certificados = datos.filter(item => item.certificado_id != null);
 
+    tablaBody.innerHTML = "";
     if (certificados.length === 0) {
         tablaBody.innerHTML = `
             <tr>
@@ -70,7 +74,6 @@ function procesarRespuesta(data) {
             </tr>
         `;
     } else {
-        tablaBody.innerHTML = "";
         certificados.forEach(cert => {
             const fila = document.createElement('tr');
             fila.innerHTML = `
@@ -79,9 +82,9 @@ function procesarRespuesta(data) {
                 <td>${formatearFecha(cert.fecha)}</td>
                 <td>
                     ${cert.rutapdf ? 
-                        `<a href="${cert.rutapdf}" target="_blank" class="btn-ver">
+                        `<button class="btn-ver" onclick="verCertificado('${cert.rutapdf}')">
                              <i class="fas fa-eye"></i> Ver
-                        </a>` : 
+                        </button>` : 
                         '<span class="no-pdf">PDF no disponible</span>'
                     }
                 </td>
@@ -134,6 +137,61 @@ function formatearFecha(fecha) {
     } catch {
         return fecha;
     }
+}
+
+// ================================================
+// Funciones para reCAPTCHA al abrir PDF
+// ================================================
+
+function verCertificado(urlPdf) {
+    certificadoSeleccionado = urlPdf;
+
+    // Ocultar todo menos el CAPTCHA
+    document.getElementById('captcha-container').classList.remove('hidden');
+    document.getElementById('resultado').classList.add('hidden');
+    document.getElementById('noResultado').classList.add('hidden');
+    document.querySelector('.search-box').classList.add('hidden');
+    
+    // Ocultar el párrafo de instrucciones
+    const instrucciones = document.querySelector('.container > p');
+    if (instrucciones) instrucciones.classList.add('hidden');
+}
+
+
+function enviarCaptcha() {
+    const response = grecaptcha.getResponse();
+    if (!response) {
+        alert("Por favor, completa el reCAPTCHA.");
+        return;
+    }
+
+    // Validar con PHP
+    fetch('validar_captcha.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `captcha=${response}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Abrir PDF en nueva pestaña
+            window.open(certificadoSeleccionado, '_blank');
+        } else {
+            alert("No se pudo validar el reCAPTCHA. Intente de nuevo.");
+        }
+
+        // Resetear CAPTCHA y mostrar nuevamente la búsqueda
+        grecaptcha.reset();
+        document.getElementById('captcha-container').classList.add('hidden');
+        document.querySelector('.search-box').classList.remove('hidden');
+    })
+    .catch(err => {
+        alert("Error al validar reCAPTCHA.");
+        console.error(err);
+        grecaptcha.reset();
+        document.getElementById('captcha-container').classList.add('hidden');
+        document.querySelector('.search-box').classList.remove('hidden');
+    });
 }
 
 // Ejecutar búsqueda si la URL ya tiene ?search=
