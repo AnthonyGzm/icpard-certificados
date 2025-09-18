@@ -401,4 +401,6 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Ignorar la carpeta de certificados PDF
-Certificados/
+certificados/
+debug.php
+icpard_certificados.sql
