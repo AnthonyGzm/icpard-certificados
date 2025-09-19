@@ -140,23 +140,30 @@ function formatearFecha(fecha) {
 }
 
 // ================================================
-// Funciones para reCAPTCHA al abrir PDF
+// Funciones para reCAPTCHA al abrir PDF - CORREGIDAS
 // ================================================
 
 function verCertificado(urlPdf) {
     certificadoSeleccionado = urlPdf;
 
-    // Ocultar todo menos el CAPTCHA
-    document.getElementById('captcha-container').classList.remove('hidden');
-    document.getElementById('resultado').classList.add('hidden');
-    document.getElementById('noResultado').classList.add('hidden');
-    document.querySelector('.search-box').classList.add('hidden');
+    // Ocultar solo los datos del titular y la tabla
+    const datosPrincipales = document.getElementById('datosPrincipales');
+    const tablaContainer = document.getElementById('tablaContainer');
+    const captchaContainer = document.getElementById('captcha-container');
     
-    // Ocultar el párrafo de instrucciones
-    const instrucciones = document.querySelector('.container > p');
-    if (instrucciones) instrucciones.classList.add('hidden');
+    console.log('Elementos encontrados:', {
+        datosPrincipales: !!datosPrincipales,
+        tablaContainer: !!tablaContainer, 
+        captchaContainer: !!captchaContainer
+    });
+    
+    if (datosPrincipales) datosPrincipales.style.display = 'none';
+    if (tablaContainer) tablaContainer.style.display = 'none';
+    if (captchaContainer) {
+        captchaContainer.classList.remove('hidden');
+        captchaContainer.style.display = 'flex';
+    }
 }
-
 
 function enviarCaptcha() {
     const response = grecaptcha.getResponse();
@@ -164,7 +171,7 @@ function enviarCaptcha() {
         alert("Por favor, completa el reCAPTCHA.");
         return;
     }
-
+    
     // Validar con PHP
     fetch('validar_captcha.php', {
         method: 'POST',
@@ -176,21 +183,27 @@ function enviarCaptcha() {
         if (data.success) {
             // Abrir PDF en nueva pestaña
             window.open(certificadoSeleccionado, '_blank');
+            
+            // Mostrar de nuevo los datos del titular y tabla
+            document.getElementById('datosPrincipales').style.display = 'block';
+            document.getElementById('tablaContainer').style.display = 'block';
+            
+            // Ocultar CAPTCHA
+            const captchaContainer = document.getElementById('captcha-container');
+            captchaContainer.style.display = 'none';
+            captchaContainer.classList.add('hidden');
+            
         } else {
             alert("No se pudo validar el reCAPTCHA. Intente de nuevo.");
         }
 
-        // Resetear CAPTCHA y mostrar nuevamente la búsqueda
+        // Resetear CAPTCHA
         grecaptcha.reset();
-        document.getElementById('captcha-container').classList.add('hidden');
-        document.querySelector('.search-box').classList.remove('hidden');
     })
     .catch(err => {
         alert("Error al validar reCAPTCHA.");
         console.error(err);
         grecaptcha.reset();
-        document.getElementById('captcha-container').classList.add('hidden');
-        document.querySelector('.search-box').classList.remove('hidden');
     });
 }
 
