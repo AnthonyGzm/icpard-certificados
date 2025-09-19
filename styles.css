@@ -30,14 +30,14 @@ body {
 .header {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* alineado a la izquierda */
+  justify-content: flex-start; 
   gap: 20px;
   margin-bottom: 30px;
   text-align: left;
 }
 
 .header .logo {
-  height: 80px; /* más grande */
+  height: 80px; 
   flex-shrink: 0;
 }
 
@@ -79,8 +79,6 @@ body {
 .search-box button:hover {
   background: #7b3ce6;
 }
-
-
 
 
 /* ====== Resultados ====== */
@@ -176,12 +174,11 @@ tr:hover {
 /* ====== Captcha ====== */
 
 #captcha-container {
-  /* NO es modal, es inline */
   position: static;
   width: 100%;
   height: auto;
   background: transparent;
-  display: flex; /* cambiar para que funcione con style.display */
+  display: flex; 
   flex-direction: column;
   justify-content: center;
   align-items: center;

@@ -146,19 +146,28 @@ function formatearFecha(fecha) {
 function verCertificado(urlPdf) {
     certificadoSeleccionado = urlPdf;
 
-    // Ocultar solo los datos del titular y la tabla
+    // Ocultar TODOS los elementos excepto el CAPTCHA
     const datosPrincipales = document.getElementById('datosPrincipales');
     const tablaContainer = document.getElementById('tablaContainer');
     const captchaContainer = document.getElementById('captcha-container');
+    const searchBox = document.querySelector('.search-box');
+    const instrucciones = document.querySelector('.container > p');
     
     console.log('Elementos encontrados:', {
         datosPrincipales: !!datosPrincipales,
         tablaContainer: !!tablaContainer, 
-        captchaContainer: !!captchaContainer
+        captchaContainer: !!captchaContainer,
+        searchBox: !!searchBox,
+        instrucciones: !!instrucciones
     });
     
+    // Ocultar todos los elementos
     if (datosPrincipales) datosPrincipales.style.display = 'none';
     if (tablaContainer) tablaContainer.style.display = 'none';
+    if (searchBox) searchBox.style.display = 'none';
+    if (instrucciones) instrucciones.style.display = 'none';
+    
+    // Mostrar CAPTCHA
     if (captchaContainer) {
         captchaContainer.classList.remove('hidden');
         captchaContainer.style.display = 'flex';
@@ -184,9 +193,12 @@ function enviarCaptcha() {
             // Abrir PDF en nueva pestaña
             window.open(certificadoSeleccionado, '_blank');
             
-            // Mostrar de nuevo los datos del titular y tabla
+            // Mostrar de nuevo TODOS los elementos
             document.getElementById('datosPrincipales').style.display = 'block';
             document.getElementById('tablaContainer').style.display = 'block';
+            document.querySelector('.search-box').style.display = 'flex';
+            const instrucciones = document.querySelector('.container > p');
+            if (instrucciones) instrucciones.style.display = 'block';
             
             // Ocultar CAPTCHA
             const captchaContainer = document.getElementById('captcha-container');
@@ -207,7 +219,7 @@ function enviarCaptcha() {
     });
 }
 
-// Ejecutar búsqueda si la URL ya tiene ?search=
+// Ejecutar búsqueda
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const search = urlParams.get('search');
