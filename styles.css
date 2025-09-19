@@ -80,6 +80,9 @@ body {
   background: #7b3ce6;
 }
 
+
+
+
 /* ====== Resultados ====== */
 .results {
   margin-top: 25px;
@@ -129,20 +132,25 @@ tr:hover {
 }
 
 .btn-ver {
-  padding: 8px 14px;
-  background: #4f2ed3;
-  color: white;
+  padding: 10px 18px;
+  background: transparent;
+  color: #4f2ed3;
+  border: 2px solid #4f2ed3;
   border-radius: 6px;
   text-decoration: none;
-  transition: 0.3s;
   font-size: 14px;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .btn-ver:hover {
-  background: #7b3ce6;
+  background: #4f2ed3;
+  color: white;
+  transform: translateY(-1px);
 }
 
 /* ====== Mensaje sin resultados ====== */
